@@ -40,11 +40,9 @@ def main(cur: sqlite3.Cursor, *, testing: bool = False) -> List[GTSEntry]:
     return new_entries
 
 
-def post_entries(entries: List[GTSEntry]) -> None:
-    discord_url = "https://discord.com/api/webhooks/1051705794606936134/uJl-xwxPlJafu7HOdpiSjexfnuYS2Hdbib2FZR8nPvpwxPGo1lBAean-eXl4tm5Ty6sQ"
-
+def post_entries(entries: List[GTSEntry], webhook) -> None:
     for entry in entries:
-        post_webhook(url=discord_url, data=discord_format(entry), entry=entry)
+        post_webhook(url=webhook, data=discord_format(entry), entry=entry)
         time.sleep(3)
 
 
@@ -53,11 +51,13 @@ if __name__ == "__main__":
     cur = con.cursor()
     safe_table_create(cur)
 
+    webhook = input("enter webhook url: ")
+
     try:
         while True:
             try:
                 entries = main(cur, testing=False)
-                post_entries(entries)
+                post_entries(entries, webhook)
             except requests.exceptions.ConnectionError as e:
                 print(f"Connection lost. Trying again in 60 seconds...")
             time.sleep(60)
